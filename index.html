@@ -424,7 +424,7 @@
           );
         };
 
-        // JUEGO 1: CYBER RUNNER
+        // JUEGO 1: CYBER RUNNER (MÁS LENTO)
         const CyberRunner = ({ onWin }) => {
           const [playerX, setPlayerX] = useState(50);
           const [playerY, setPlayerY] = useState(80);
@@ -469,7 +469,9 @@
           const update = useCallback(() => {
             if (failed || gameWon) return;
             const timeElapsed = 15 - timeLeft;
-            const baseSpeed = 0.8 + (timeElapsed * 0.04); 
+            
+            // VELOCIDAD REDUCIDA PARA QUE SEA MÁS FÁCIL
+            const baseSpeed = 0.4 + (timeElapsed * 0.02); 
 
             setObstacles(prev => {
               let newObstacles = [];
@@ -481,7 +483,7 @@
 
                 if (ob.type === 'ghost' && nextY > 95 && timeLeft <= 10) {
                   for(let i=0; i<3; i++) {
-                     newObstacles.push({ id: Date.now() + Math.random(), x: ob.x, y: 95, type: 'fragment', speedY: -randomRange(0.5, 1.5), speedX: randomRange(-1, 1) });
+                     newObstacles.push({ id: Date.now() + Math.random(), x: ob.x, y: 95, type: 'fragment', speedY: -randomRange(0.3, 1.0), speedX: randomRange(-0.8, 0.8) });
                   }
                   return; 
                 }
@@ -515,7 +517,8 @@
               return newObstacles;
             });
 
-            const spawnChance = 0.02 + (timeElapsed * 0.003);
+            // MENOS OBSTÁCULOS
+            const spawnChance = 0.015 + (timeElapsed * 0.002);
             if (Math.random() < spawnChance) {
               setObstacles(prev => [...prev, { id: Date.now(), x: randomRange(10, 90), y: -10, type: 'ghost' }]);
             }
@@ -761,7 +764,7 @@
           );
         };
 
-        // JUEGO 3: REGINA ACTION HERO
+        // JUEGO 3: REGINA ACTION HERO (BALANCED)
         const ActionHeroGame = ({ onWin }) => {
           const [player, setPlayer] = useState({ x: 10, y: 0, vy: 0, facingRight: true });
           const [bullets, setBullets] = useState([]);
@@ -1310,7 +1313,28 @@
 
         // --- APP CONTROLLER ---
         function App() {
-          const [stage, setStage] = useState('intro');
+          const [stage, setStage] = useState('start'); // Iniciamos en 'start' para pedir Fullscreen
+          const [isFullscreen, setIsFullscreen] = useState(false);
+
+          const handleStart = () => {
+            // Intentar entrar en pantalla completa
+            const elem = document.documentElement;
+            if (elem.requestFullscreen) {
+              elem.requestFullscreen().catch(e => console.log(e));
+            } else if (elem.webkitRequestFullscreen) {
+              elem.webkitRequestFullscreen().catch(e => console.log(e));
+            }
+            
+            // Intentar forzar rotación a horizontal en celulares
+            try {
+               if (window.screen.orientation && window.screen.orientation.lock) {
+                  window.screen.orientation.lock('landscape').catch(e => console.log(e));
+               }
+            } catch(e) {}
+
+            setIsFullscreen(true);
+            setStage('intro');
+          };
 
           const introSlides = [
             { text: "Hola Regina, esto es por y para tiii :D" },
@@ -1355,9 +1379,27 @@
               <CRTEffect />
               <AnimatePresence mode="wait">
                 
+                {/* --- PANTALLA DE INICIO PARA FULLSCREEN --- */}
+                {stage === 'start' && (
+                  <motion.div 
+                    key="start" 
+                    className="h-full w-full flex flex-col items-center justify-center bg-black relative z-50"
+                    exit={{ opacity: 0 }}
+                  >
+                     <motion.button 
+                       onClick={handleStart}
+                       whileHover={{ scale: 1.1 }}
+                       whileTap={{ scale: 0.9 }}
+                       className="bg-pink-600 border-4 border-pink-400 text-white font-black text-2xl md:text-4xl py-6 px-12 rounded-full shadow-[0_0_30px_rgba(219,39,119,0.8)] animate-pulse"
+                     >
+                        ¡EMPEZAR AVENTURA!
+                     </motion.button>
+                     <p className="text-zinc-500 mt-6 font-mono text-sm">Gira tu celular para una mejor experiencia 📱</p>
+                  </motion.div>
+                )}
+
                 {stage === 'intro' && <SlideSequence key="intro" slides={introSlides} onComplete={() => setStage('quiz_intro')} />}
                 
-                {/* --- NUEVO JUEGO: DUOLINGO QUIZ --- */}
                 {stage === 'quiz_intro' && <SlideSequence key="quiz_intro" slides={quizIntroSlides} onComplete={() => setStage('game_quiz')} />}
                 {stage === 'game_quiz' && <DuolingoQuiz key="game_quiz" onWin={() => setStage('runner_intro')} />}
 
@@ -1380,9 +1422,9 @@
                 {stage === 'love_intro' && <SlideSequence key="love_intro" slides={loveIntroSlides} onComplete={() => setStage('game_love')} />}
                 {stage === 'game_love' && <LoveHeartGame key="game_love" onWin={() => setStage('final_screen')} />}
 
-                {stage === 'final_screen' && <FinalScreen key="final" onRestart={() => setStage('intro')} />}
+                {stage === 'final_screen' && <FinalScreen key="final" onRestart={() => setStage('start')} />}
               </AnimatePresence>
-              <div className="fixed bottom-2 right-2 text-[10px] text-green-900 font-mono z-50 opacity-50 pointer-events-none">v13.0 // REGINA_LANDSCAPE_FIX</div>
+              <div className="fixed bottom-2 right-2 text-[10px] text-green-900 font-mono z-50 opacity-50 pointer-events-none">v14.0 // REGINA_FULLSCREEN</div>
             </div>
           );
         }
