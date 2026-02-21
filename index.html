@@ -1,0 +1,1395 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>For Berryyy</title>
+
+    <!-- Tailwind CSS para los estilos -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- FontAwesome para los iconos -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- React & ReactDOM -->
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+
+    <!-- Babel para compilar JSX en el navegador -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <!-- Framer Motion para las animaciones -->
+    <script src="https://unpkg.com/framer-motion@10.16.4/dist/framer-motion.js"></script>
+
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: black;
+            touch-action: none;
+        }
+        #root {
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef, useCallback } = React;
+        const { motion, AnimatePresence } = window.Motion;
+        
+        // --- ADAPTADOR DE ICONOS ---
+        const IconWrapper = ({ icon, size = 24, className = "" }) => (
+          <i className={`fa-solid ${icon} ${className}`} style={{ fontSize: size }}></i>
+        );
+
+        const Heart = (props) => <IconWrapper icon="fa-heart" {...props} />;
+        const Skull = (props) => <IconWrapper icon="fa-skull" {...props} />;
+        const Zap = (props) => <IconWrapper icon="fa-bolt" {...props} />;
+        const RefreshCcw = (props) => <IconWrapper icon="fa-arrows-rotate" {...props} />;
+        const Ghost = (props) => <IconWrapper icon="fa-ghost" {...props} />;
+        const Cpu = (props) => <IconWrapper icon="fa-microchip" {...props} />;
+        const Brain = (props) => <IconWrapper icon="fa-brain" {...props} />;
+        const ArrowRight = (props) => <IconWrapper icon="fa-arrow-right" {...props} />;
+        const ArrowLeft = (props) => <IconWrapper icon="fa-arrow-left" {...props} />;
+        const ArrowUp = (props) => <IconWrapper icon="fa-arrow-up" {...props} />;
+        const Sparkles = (props) => <IconWrapper icon="fa-wand-magic-sparkles" {...props} />;
+        const Shield = (props) => <IconWrapper icon="fa-shield-halved" {...props} />;
+        const Utensils = (props) => <IconWrapper icon="fa-utensils" {...props} />;
+        const FlaskConical = (props) => <IconWrapper icon="fa-flask" {...props} />;
+        const Bath = (props) => <IconWrapper icon="fa-bath" {...props} />;
+        const Sofa = (props) => <IconWrapper icon="fa-couch" {...props} />;
+        const Droplets = (props) => <IconWrapper icon="fa-droplet" {...props} />;
+        const Hand = (props) => <IconWrapper icon="fa-hand" {...props} />;
+        const Crosshair = (props) => <IconWrapper icon="fa-crosshairs" {...props} />;
+        const Target = (props) => <IconWrapper icon="fa-bullseye" {...props} />;
+        const Bomb = (props) => <IconWrapper icon="fa-bomb" {...props} />;
+        const Activity = (props) => <IconWrapper icon="fa-chart-line" {...props} />;
+        const Package = (props) => <IconWrapper icon="fa-box" {...props} />;
+        const RotateCw = (props) => <IconWrapper icon="fa-rotate-right" {...props} />;
+        const AlertTriangle = (props) => <IconWrapper icon="fa-triangle-exclamation" {...props} />;
+
+        // --- ASSETS & CONFIG ---
+        const PHOTOS = {
+          mangos: "https://shapes.inc/api/public/avatar/mangomemesbot",  
+          sixseven: "https://assets.newsweek.com/wp-content/uploads/2025/10/67.png?w=1600&quality=80&webp=1",
+          avatar: "https://i.imgur.com/7qqXnnl.png", 
+          pixel: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=400&q=80",
+          random: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRG6gl_vXeHIhk5ROr4pPzCRKKZuKbVVkpl9A&s",
+          plant: "https://images.unsplash.com/photo-1485955900006-10f4d324d411?auto=format&fit=crop&w=500&q=80",
+          gun: "https://armas1000.cl/wp-content/uploads/2025/01/EC9459B-3D.webp",
+          zombie: "https://thelastofus.es/wp-content/uploads/2020/03/07745f9bc7cf9b4f4e52bf6add19f9f9-removebg-413x1024.png", 
+          tlous_meme: "https://static.wikia.nocookie.net/thelastofus/images/f/fe/Portada_Parte_I_limpia.jpeg/revision/latest/thumbnail/width/360/height/360?cb=20211209015400&path-prefix=es",
+          apocalypse_bg: "https://images.unsplash.com/photo-1551639420-213c41031d75?q=80&w=1000&auto=format&fit=crop",
+          quiz1: "https://i.ytimg.com/vi/dBuTGoacN2g/hq720.jpg?sqp=-oaymwEhCK4FEIIDSFryq4qpAxMIARUAAAAAGAElAADIQj0AgKJD&rs=AOn4CLBdQ9Hwr_rVwMLL1jQHGZYhrtCVyQ",
+          quiz2: "https://ih1.redbubble.net/image.4053308135.8292/flat,750x,075,f-pad,750x1000,f8f8f8.jpg",
+          quiz3: "https://storage.googleapis.com/media-cloud-na/2025/04/pisos-piezoelectricos-3.jpg.webp", 
+          quiz4: "https://i.kym-cdn.com/photos/images/original/003/158/432/111.jpeg", 
+          quiz5: "https://pbs.twimg.com/media/HBLC6AXakAUbfie.jpg",
+          // ¡AQUI PONES LAS COSAS QUE NO LE GUSTAN!
+          bad1: "https://m.media-amazon.com/images/I/71q9LBr+o+L._AC_UF894,1000_QL80_.jpg", // Placeholder Araña
+          bad2: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTs0OR5i16MYuaDnESJNcd6HKVHnkbicu_Avw&s", // Placeholder Tráfico
+          bad3: "https://cdn4.idcgames.com/storage/image/1258/free-new-logo/default.jpg"  // Placeholder Despertador
+        };
+
+        const randomRange = (min, max) => Math.random() * (max - min) + min;
+
+
+        // --- EFECTOS VISUALES ---
+        const CRTEffect = () => (
+          <div className="pointer-events-none fixed inset-0 z-50 overflow-hidden h-full w-full">
+            <div className="absolute inset-0 bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,255,0.06))] z-50 bg-[length:100%_2px,3px_100%] pointer-events-none"></div>
+            <div className="absolute inset-0 bg-[radial-gradient(circle,rgba(0,0,0,0)_50%,rgba(0,0,0,0.6)_100%)] z-40"></div>
+          </div>
+        );
+
+        const TotemOverlay = () => (
+          <div className="absolute inset-0 z-50 flex items-center justify-center pointer-events-none overflow-hidden">
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: [0, 0.8, 0] }}
+              transition={{ duration: 0.5 }}
+              className="absolute inset-0 bg-yellow-400 mix-blend-hard-light"
+            />
+            <motion.div
+              initial={{ scale: 0.5, y: 100, opacity: 0 }}
+              animate={{ scale: [0.5, 1.2, 1.5], y: [100, 0, -100], opacity: [0, 1, 0] }}
+              transition={{ duration: 1.5, ease: "easeOut" }}
+              className="text-9xl drop-shadow-[0_0_30px_rgba(250,204,21,1)] filter brightness-110"
+            >
+              🗿
+            </motion.div>
+          </div>
+        );
+
+        const ResurrectionOverlay = () => (
+          <div className="absolute inset-0 z-50 flex items-center justify-center pointer-events-none overflow-hidden">
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: [0, 0.9, 0] }}
+              transition={{ duration: 0.8 }}
+              className="absolute inset-0 bg-purple-600 mix-blend-multiply"
+            />
+            <motion.div
+              initial={{ scale: 0.2, opacity: 0 }}
+              animate={{ 
+                scale: [0.2, 1.5, 2], 
+                opacity: [0, 1, 0],
+                rotate: [0, -10, 10, -10, 0]
+              }}
+              transition={{ duration: 1.5, ease: "circOut" }}
+              className="text-9xl relative z-10 drop-shadow-[0_0_50px_rgba(168,85,247,1)]"
+            >
+              🗿
+            </motion.div>
+            <motion.div
+              initial={{ y: 50, opacity: 0 }}
+              animate={{ y: 0, opacity: [0, 1, 0] }}
+              transition={{ delay: 0.2, duration: 1.5 }}
+              className="absolute bottom-1/4 text-4xl font-black text-purple-400 tracking-widest uppercase drop-shadow-lg"
+            >
+              RESURRECCIÓN
+            </motion.div>
+          </div>
+        );
+
+        const DeathOverlay = () => (
+          <div className="absolute inset-0 z-50 flex items-center justify-center pointer-events-none overflow-hidden bg-black/50">
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: [0, 0.8, 0.4, 0.9], x: [-20, 20, -10, 10, 0] }}
+              transition={{ duration: 0.8 }}
+              className="absolute inset-0 bg-red-700 mix-blend-multiply"
+            />
+          </div>
+        );
+
+        // --- COMPONENTES UI ---
+        const SlideSequence = ({ slides, onComplete }) => {
+          const [slide, setSlide] = useState(0);
+
+          useEffect(() => {
+            const currentDuration = slides[slide]?.duration || 4000;
+            if (slide < slides.length) {
+              const timer = setTimeout(() => {
+                setSlide(s => s + 1);
+              }, currentDuration);
+              return () => clearTimeout(timer);
+            } else {
+              onComplete();
+            }
+          }, [slide, onComplete, slides]);
+
+          const nextSlide = () => setSlide(s => s + 1);
+
+          return (
+            <div className="h-full w-full flex flex-col items-center justify-center bg-black text-center p-6 relative overflow-hidden cursor-pointer select-none" onClick={nextSlide}>
+              <AnimatePresence mode="wait">
+                {slide < slides.length && (
+                  <motion.div
+                    key={slide}
+                    initial={{ opacity: 0, scale: 0.9, y: 20, rotate: -2 }}
+                    animate={{ opacity: 1, scale: 1, y: 0, rotate: 0 }}
+                    exit={{ opacity: 0, scale: 1.1, y: -20, rotate: 2 }}
+                    transition={{ duration: 0.5 }}
+                    className="flex flex-col items-center gap-6 max-w-md z-10"
+                  >
+                    {slides[slide].img && (
+                      <motion.div 
+                        className={`overflow-hidden border-4 border-pink-500 rounded-2xl shadow-[0_0_30px_rgba(236,72,153,0.4)] bg-zinc-900`}
+                        initial={{ scale: 0 }}
+                        animate={{ scale: 1, rotate: [0, -2, 2, 0] }}
+                      >
+                        <img src={slides[slide].img} className={`object-cover w-64 h-48 md:w-80 md:h-64`} alt="Slide visual" />
+                      </motion.div>
+                    )}
+                    <h1 className="text-2xl md:text-4xl font-black bg-clip-text text-transparent bg-gradient-to-r from-yellow-300 via-white to-pink-300 leading-tight drop-shadow-lg">
+                      {slides[slide].text}
+                    </h1>
+                    {slides[slide].sub && (
+                      <p className="text-pink-400 text-lg font-bold italic animate-pulse">
+                        {slides[slide].sub}
+                      </p>
+                    )}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+              <div className="absolute inset-0 z-0 opacity-30 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-indigo-900 via-black to-black" />
+              <div className="absolute bottom-10 text-zinc-600 text-xs animate-bounce font-mono">Toca para saltar</div>
+            </div>
+          );
+        };
+
+        const RetryScreen = ({ onRetry, message = "Don't give up, Regina!" }) => (
+          <motion.div 
+            initial={{ opacity: 0, scale: 1.1 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="absolute inset-0 z-50 bg-black/90 flex flex-col items-center justify-center space-y-6 text-center p-4"
+          >
+            <div className="absolute inset-0 bg-red-900/20 animate-pulse pointer-events-none" />
+            <motion.h2 
+              initial={{ y: -50 }} animate={{ y: 0 }} 
+              className="text-red-600 font-black text-6xl md:text-8xl tracking-tighter drop-shadow-[0_0_20px_rgba(220,38,38,0.8)]"
+            >
+              FAIL
+            </motion.h2>
+            <p className="text-zinc-300 font-mono text-lg max-w-xs z-10 relative">{message}</p>
+            <motion.button 
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+              onClick={onRetry}
+              className="bg-white text-black font-black py-3 px-8 rounded-full text-xl shadow-[0_0_20px_rgba(255,255,255,0.5)] flex items-center gap-2 z-10 relative"
+            >
+              <RefreshCcw size={24} /> INTENTAR DE NUEVO
+            </motion.button>
+          </motion.div>
+        );
+
+        // --- JUEGOS ---
+
+        // JUEGO 0: DUOLINGO QUIZ (EXPANDIDO)
+        const DuolingoQuiz = ({ onWin }) => {
+          const QUESTIONS = [
+            {
+              id: 1,
+              img: PHOTOS.quiz1,
+              text: "Completa la frase:\n\"I'm your dad, I'm your son. _______\"",
+              options: ["Ummm bobby", "Two steps ahead", "I'm the one who knocks", "Say my name"],
+              correct: 0
+            },
+            {
+              id: 2,
+              img: PHOTOS.quiz2,
+              text: "¿Qué porcentaje es la meta de pureza de Walter y Jesse?",
+              options: ["100%", "96.2%", "99.1%", "69%"],
+              correct: 2
+            },
+            {
+              id: 3,
+              img: PHOTOS.quiz3,
+              text: "¿Qué hace Japón con los pasos?",
+              options: ["No sé", "We Are Charlie Kirk", "67", "Turn them into electricity"],
+              correct: 3
+            },
+            {
+              id: 4,
+              img: PHOTOS.quiz4,
+              text: "¿De cuántos balazos se lo tronaron a este muchacho?",
+              options: ["4", "1", "Mangos", "67"],
+              correct: 0
+            },
+            {
+              id: 5,
+              img: PHOTOS.quiz5,
+              text: "¿Quién es este personaje importante en la revolución mexicana?",
+              options: ["Benito Camelo", "Elver Galarga", "Companocha", "Prepucio López"],
+              correct: 3
+            }
+          ];
+
+          const [currentQ, setCurrentQ] = useState(0);
+          const [selected, setSelected] = useState(null);
+          const [status, setStatus] = useState('idle'); // idle, correct, wrong
+
+          const question = QUESTIONS[currentQ];
+
+          const handleCheck = () => {
+            if (selected === null) return;
+            if (selected === question.correct) {
+              setStatus('correct');
+            } else {
+              setStatus('wrong');
+            }
+          };
+
+          const handleNext = () => {
+            if (status === 'correct') {
+              if (currentQ < QUESTIONS.length - 1) {
+                setCurrentQ(c => c + 1);
+                setSelected(null);
+                setStatus('idle');
+              } else {
+                onWin();
+              }
+            } else {
+              // Si falla, se queda en la misma pregunta (como Duolingo)
+              setSelected(null);
+              setStatus('idle');
+            }
+          };
+
+          return (
+            <div className="h-full w-full bg-[#131F24] flex flex-col items-center select-none font-sans overflow-hidden">
+              {/* Barra de progreso superior */}
+              <div className="w-full max-w-md px-6 pt-6 pb-2 flex items-center gap-4 shrink-0">
+                <i className="fa-solid fa-xmark text-gray-400 text-xl"></i>
+                <div className="flex-1 h-4 bg-gray-700 rounded-full overflow-hidden">
+                   <motion.div 
+                     className="h-full bg-[#58CC02] rounded-full"
+                     initial={{ width: `${(currentQ / QUESTIONS.length) * 100}%` }}
+                     animate={{ width: `${((currentQ + (status === 'correct' ? 1 : 0)) / QUESTIONS.length) * 100}%` }}
+                   />
+                </div>
+                <div className="flex items-center gap-1 text-red-500 font-bold">
+                  <i className="fa-solid fa-heart"></i> 5
+                </div>
+              </div>
+
+              {/* Contenido de la Pregunta (CON SCROLL SI ES NECESARIO) */}
+              <div className="flex-1 w-full max-w-md px-6 flex flex-col pt-2 pb-4 overflow-y-auto">
+                <h2 className="text-xl md:text-2xl font-bold text-white mb-4 whitespace-pre-wrap leading-tight">{question.text}</h2>
+                
+                <div className="w-full flex justify-center mb-6 shrink-0">
+                  <div className="w-32 h-32 md:w-48 md:h-48 bg-gray-800 rounded-2xl overflow-hidden border-4 border-gray-700 shadow-lg">
+                    <img src={question.img} className="w-full h-full object-cover" alt="Referencia" />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 gap-3 w-full mt-auto shrink-0">
+                  {question.options.map((opt, i) => (
+                    <button
+                      key={i}
+                      onClick={() => status === 'idle' && setSelected(i)}
+                      className={`relative w-full p-3 md:p-4 rounded-xl border-2 text-left font-bold text-base md:text-lg transition-all duration-200 transform active:translate-y-1 ${
+                        selected === i 
+                          ? 'bg-[#1D2B33] border-[#84D8FF] text-[#84D8FF]' 
+                          : 'bg-transparent border-gray-600 text-white hover:bg-gray-800'
+                      }`}
+                      style={{ 
+                        borderBottomWidth: selected === i ? '2px' : '4px',
+                        transform: selected === i ? 'translateY(2px)' : 'none'
+                      }}
+                    >
+                      {opt}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Barra Inferior */}
+              <div className={`w-full max-w-md p-4 shrink-0 border-t-2 transition-colors duration-300 ${
+                status === 'idle' ? 'border-gray-800 bg-[#131F24]' : 
+                status === 'correct' ? 'border-[#58CC02] bg-[#1a3815]' : 'border-[#FF4B4B] bg-[#3a1616]'
+              }`}>
+                {status === 'correct' && (
+                  <div className="flex items-center gap-3 text-[#58CC02] font-bold text-xl mb-4">
+                    <div className="w-8 h-8 rounded-full bg-[#58CC02] text-white flex items-center justify-center"><i className="fa-solid fa-check"></i></div>
+                    ¡Increíble!
+                  </div>
+                )}
+                {status === 'wrong' && (
+                  <div className="flex items-center gap-3 text-[#FF4B4B] font-bold text-xl mb-4">
+                    <div className="w-8 h-8 rounded-full bg-[#FF4B4B] text-white flex items-center justify-center"><i className="fa-solid fa-xmark"></i></div>
+                    Nel, te falta calle.
+                  </div>
+                )}
+                
+                {status === 'idle' ? (
+                  <button 
+                    onClick={handleCheck}
+                    disabled={selected === null}
+                    className={`w-full py-4 rounded-xl font-bold text-lg uppercase tracking-wider transition-all border-b-4 active:border-b-0 active:translate-y-1 ${
+                      selected !== null 
+                        ? 'bg-[#58CC02] border-[#58A700] text-white hover:bg-[#61E002]' 
+                        : 'bg-gray-700 border-gray-800 text-gray-500 cursor-not-allowed'
+                    }`}
+                  >
+                    COMPROBAR
+                  </button>
+                ) : (
+                  <button 
+                    onClick={handleNext}
+                    className={`w-full py-4 rounded-xl font-bold text-lg uppercase tracking-wider transition-all border-b-4 active:border-b-0 active:translate-y-1 ${
+                      status === 'correct'
+                        ? 'bg-[#58CC02] border-[#58A700] text-white'
+                        : 'bg-[#FF4B4B] border-[#EA2B2B] text-white'
+                    }`}
+                  >
+                    CONTINUAR
+                  </button>
+                )}
+              </div>
+            </div>
+          );
+        };
+
+        // JUEGO 1: CYBER RUNNER
+        const CyberRunner = ({ onWin }) => {
+          const [playerX, setPlayerX] = useState(50);
+          const [playerY, setPlayerY] = useState(80);
+          const [obstacles, setObstacles] = useState([]);
+          const [timeLeft, setTimeLeft] = useState(15);
+          const [health, setHealth] = useState(100);
+          const [failed, setFailed] = useState(false);
+          const [gameWon, setGameWon] = useState(false);
+          const [totemActive, setTotemActive] = useState(false);
+          const [isInvincible, setIsInvincible] = useState(false);
+          
+          const containerRef = useRef(null);
+          const reqRef = useRef();
+          
+          const resetGame = () => {
+            setTimeLeft(15);
+            setObstacles([]);
+            setHealth(100);
+            setFailed(false);
+            setGameWon(false);
+            setPlayerX(50);
+            setPlayerY(80);
+            setTotemActive(false);
+            setIsInvincible(false);
+          };
+
+          useEffect(() => {
+            if (failed || gameWon) return;
+            const timer = setInterval(() => {
+              setTimeLeft(prev => {
+                if (prev <= 1) {
+                   setGameWon(true);
+                   setTimeout(onWin, 500);
+                   return 0;
+                }
+                return prev - 1;
+              });
+            }, 1000);
+            return () => clearInterval(timer);
+          }, [failed, gameWon, onWin]);
+
+          const update = useCallback(() => {
+            if (failed || gameWon) return;
+            const timeElapsed = 15 - timeLeft;
+            const baseSpeed = 0.8 + (timeElapsed * 0.04); 
+
+            setObstacles(prev => {
+              let newObstacles = [];
+              let currentHealth = health;
+
+              prev.forEach(ob => {
+                let nextY = ob.y + (ob.speedY !== undefined ? ob.speedY : baseSpeed);
+                let nextX = ob.x + (ob.speedX || 0);
+
+                if (ob.type === 'ghost' && nextY > 95 && timeLeft <= 10) {
+                  for(let i=0; i<3; i++) {
+                     newObstacles.push({ id: Date.now() + Math.random(), x: ob.x, y: 95, type: 'fragment', speedY: -randomRange(0.5, 1.5), speedX: randomRange(-1, 1) });
+                  }
+                  return; 
+                }
+
+                if (nextY > 105 || nextY < -10 || nextX < 0 || nextX > 100) return;
+
+                const hitboxX = ob.type === 'ghost' ? 5 : 3; 
+                const hitboxY = ob.type === 'ghost' ? 8 : 4; 
+                const isHit = Math.abs(nextY - playerY) < hitboxY && Math.abs(nextX - playerX) < hitboxX;
+
+                if (isHit) {
+                  if (!isInvincible) currentHealth -= (ob.type === 'ghost' ? 34 : 15);
+                } else {
+                  newObstacles.push({ ...ob, x: nextX, y: nextY });
+                }
+              });
+
+              if (currentHealth <= 0) {
+                  if (!totemActive && !isInvincible) {
+                     setTotemActive(true);
+                     setIsInvincible(true);
+                     currentHealth = 100;
+                     setTimeout(() => setTotemActive(false), 1500); 
+                     setTimeout(() => setIsInvincible(false), 3000);
+                  } else if (totemActive) {
+                     currentHealth = 100;
+                  }
+              }
+
+              setHealth(Math.max(0, currentHealth));
+              return newObstacles;
+            });
+
+            const spawnChance = 0.02 + (timeElapsed * 0.003);
+            if (Math.random() < spawnChance) {
+              setObstacles(prev => [...prev, { id: Date.now(), x: randomRange(10, 90), y: -10, type: 'ghost' }]);
+            }
+
+            reqRef.current = requestAnimationFrame(update);
+          }, [playerX, playerY, failed, gameWon, timeLeft, health, isInvincible, totemActive]);
+
+          useEffect(() => {
+            reqRef.current = requestAnimationFrame(update);
+            return () => cancelAnimationFrame(reqRef.current);
+          }, [update]);
+
+          const handleMove = (e) => {
+            if (!containerRef.current || failed || gameWon) return;
+            const rect = containerRef.current.getBoundingClientRect();
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+            setPlayerX(Math.max(5, Math.min(95, ((clientX - rect.left) / rect.width) * 100)));
+            setPlayerY(Math.max(5, Math.min(95, ((clientY - rect.top) / rect.height) * 100)));
+          };
+
+          return (
+            <div ref={containerRef} className="relative h-full w-full bg-slate-900 overflow-hidden touch-none cursor-none" onMouseMove={handleMove} onTouchMove={handleMove}>
+              <motion.div 
+                className="absolute inset-0 w-full h-full" 
+                animate={totemActive ? { x: [-20, 20, -10, 10, -5, 5, 0] } : {}} 
+                transition={{ duration: 0.5 }}
+              >
+                  <div className="absolute top-4 left-4 right-4 z-20 flex justify-between items-start font-mono font-bold pointer-events-none">
+                    <div className="flex gap-4">
+                       <div className="bg-black/50 px-3 py-1 border-l-4 border-pink-500 text-pink-500">SURVIVE: {timeLeft}s</div>
+                       <div className="bg-purple-900/80 px-3 py-1 rounded-full border border-purple-500 text-white flex items-center gap-2">
+                           <span className="text-xl">🗿</span><span className="font-bold">∞</span>
+                       </div>
+                    </div>
+                    <div className="flex flex-col items-end w-32">
+                      <div className="w-full h-4 bg-gray-800 border border-white/20 rounded-full overflow-hidden relative">
+                         <motion.div className={`h-full ${isInvincible ? 'bg-yellow-400' : (health > 50 ? 'bg-green-500' : (health > 25 ? 'bg-yellow-500' : 'bg-red-500'))}`} initial={{ width: "100%" }} animate={{ width: `${health}%` }} />
+                         {isInvincible && <div className="absolute inset-0 flex items-center justify-center text-[10px] text-black font-bold uppercase tracking-widest animate-pulse">INVENCIBLE</div>}
+                      </div>
+                      <span className="text-xs text-white/50 mt-1">HP: {Math.ceil(health)}%</span>
+                    </div>
+                  </div>
+                  <div className="absolute inset-0 w-full h-full opacity-30" style={{ backgroundImage: 'linear-gradient(0deg, transparent 24%, #ec4899 25%, #ec4899 26%, transparent 27%, transparent 74%, #ec4899 75%, #ec4899 76%, transparent 77%, transparent), linear-gradient(90deg, transparent 24%, #ec4899 25%, #ec4899 26%, transparent 27%, transparent 74%, #ec4899 75%, #ec4899 76%, transparent 77%, transparent)', backgroundSize: '50px 50px', transform: 'perspective(500px) rotateX(60deg) translateY(100px) scale(2)' }}></div>
+                  
+                  <motion.div className="absolute w-16 h-16 bg-green-400 border-4 border-white shadow-[0_0_20px_#4ade80] rounded-lg" style={{ left: `calc(${playerX}% - 32px)`, top: `calc(${playerY}% - 32px)` }} animate={isInvincible ? { opacity: [1, 0.2, 1], scale: [1, 1.2, 1] } : (health < 30 ? { opacity: [1, 0.5, 1] } : {})} transition={isInvincible ? { repeat: Infinity, duration: 0.2 } : {}}>
+                    <img src={PHOTOS.avatar} className="w-full h-full object-cover grayscale contrast-125 rounded-md" style={{ imageRendering: 'pixelated' }} />
+                    {isInvincible && <div className="absolute -top-6 left-1/2 -translate-x-1/2 text-yellow-400 animate-bounce"><Shield size={20} fill="currentColor" /></div>}
+                  </motion.div>
+                  {obstacles.map(ob => (
+                    <div key={ob.id} className={`absolute flex items-center justify-center ${ob.type === 'fragment' ? 'w-4 h-4 text-orange-400' : 'text-4xl text-red-500'}`} style={{ top: `${ob.y}%`, left: `${ob.x}%`, transform: 'translateX(-50%)' }}>
+                      {ob.type === 'fragment' ? <Sparkles size={16} /> : <Ghost />}
+                    </div>
+                  ))}
+              </motion.div>
+              {totemActive && <TotemOverlay />}
+              {failed && <RetryScreen onRetry={resetGame} />}
+            </div>
+          );
+        };
+
+        // JUEGO 2: PLANT CARE
+        const PlantGame = ({ onWin, onKill }) => {
+          const [plantState, setPlantState] = useState('idle'); 
+          const [room, setRoom] = useState('living'); 
+          const [dialog, setDialog] = useState("");
+          const [animation, setAnimation] = useState('idle'); 
+          const [endResult, setEndResult] = useState(null); 
+
+          const triggerAnimation = (anim) => {
+            setAnimation(anim);
+            setTimeout(() => setAnimation('idle'), 2000);
+          };
+
+          const showImportantDialog = (text) => {
+            setDialog(text);
+          };
+
+          useEffect(() => {
+            if (plantState === 'dead' || endResult) return;
+            
+            const interval = setInterval(() => {
+              if (animation !== 'idle') return; 
+              const dialogs = {
+                living: ["Zzzzz... 😪", "Hazme caso... 🥺", "Me quieres? 🥀"],
+                kitchen: ["TENGO HAMBRE", "Dame ese bistec ummm... 🥩", "Aliméntame o muero... 💀"],
+                bathroom: ["No me mires... ", "Estoy sucia... 🛁", "Water? 💧"]
+              };
+              setDialog(dialogs[room][Math.floor(Math.random() * dialogs[room].length)]);
+            }, 4000);
+            
+            return () => clearInterval(interval);
+          }, [room, plantState, animation, endResult]);
+          
+          const handleKill = () => {
+            setPlantState('dead');
+            setDialog("...");
+            setEndResult('failure');
+          };
+
+          const handleInteract = (action) => {
+            if (action === 'pet') {
+              showImportantDialog("¡¡Ay!! Con cuidado!");
+              triggerAnimation('petting');
+            }
+            if (action === 'wash') {
+              showImportantDialog("¡¡¡¡¡¡¡Está fría!!!!");
+              triggerAnimation('washing');
+            }
+            if (action === 'poison') {
+              triggerAnimation('eating');
+              setEndResult('success');
+            }
+          };
+
+          const plantVariants = {
+            idle: { scaleY: [0.95, 1.02, 0.95], scaleX: [1.02, 0.98, 1.02], rotate: 0 },
+            petting: { rotate: [0, 5, -5, 5, -5, 0], scale: 1.1 },
+            washing: { y: [0, 5, -5, 0], filter: "brightness(1.2)" },
+            eating: { scaleX: [1, 1.3, 0.8, 1], scaleY: [1, 0.8, 1.2, 1] }
+          };
+
+          if (endResult) {
+            return (
+              <motion.div 
+                className={`h-full w-full flex flex-col items-center justify-center text-center p-8 select-none relative overflow-hidden ${endResult === 'success' ? 'bg-green-900' : 'bg-red-950'}`}
+                animate={endResult === 'failure' ? { x: [-30, 30, -30, 30, -15, 15, 0], backgroundColor: ['#450a0a', '#7f1d1d', '#450a0a'] } : {}}
+                transition={{ duration: 0.8, repeat: endResult === 'failure' ? Infinity : 0 }}
+              >
+                {endResult === 'failure' && (
+                  <div className="absolute inset-0 bg-red-600 mix-blend-multiply opacity-50 animate-pulse pointer-events-none" />
+                )}
+                {endResult === 'success' && (
+                  <div className="absolute inset-0 bg-pink-500 mix-blend-overlay opacity-30 pointer-events-none" />
+                )}
+
+                {/* Partículas de Éxito */}
+                {endResult === 'success' && [...Array(20)].map((_, i) => (
+                  <motion.div
+                    key={`heart-${i}`}
+                    className="absolute text-3xl text-pink-400 drop-shadow-[0_0_10px_rgba(236,72,153,0.8)]"
+                    initial={{ x: 0, y: 0, scale: 0, opacity: 1 }}
+                    animate={{ 
+                      x: (Math.random() - 0.5) * 500, 
+                      y: (Math.random() - 0.5) * 500, 
+                      scale: Math.random() * 2 + 1,
+                      opacity: 0 
+                    }}
+                    transition={{ duration: 1.5 + Math.random(), repeat: Infinity }}
+                  >
+                    💖
+                  </motion.div>
+                ))}
+
+                <motion.div 
+                  initial={{ scale: 0 }} 
+                  animate={endResult === 'success' ? { scale: [0, 3, 1], rotate: [0, 360, 360] } : { scale: [0, 4, 1.5], rotate: [-20, 20, -20, 20, 0] }}
+                  transition={{ duration: 1.2, type: "spring" }}
+                  className="mb-8 text-9xl z-10 relative"
+                >
+                  {endResult === 'success' ? '💖' : '💀'}
+                </motion.div>
+
+                <motion.h1 
+                  initial={{ opacity: 0, y: 50 }} 
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.5 }}
+                  className={`text-4xl md:text-6xl font-black text-white mb-12 z-10 relative drop-shadow-2xl uppercase tracking-tighter leading-tight`}
+                >
+                  {endResult === 'success' ? "¡ERES BUENA CUIDANDO! :D el veneno no afecta a la planta!!" : "¡LA MATASTE!\n¡QUÉ MALA ERES! El bistec tenía un virus mortal para la planta🥀🥀🥀"}
+                </motion.h1>
+
+                <motion.button
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 1.5 }}
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.9 }}
+                  onClick={endResult === 'success' ? onWin : onKill}
+                  className="bg-white text-black font-black py-4 px-10 rounded-full text-xl shadow-[0_0_30px_rgba(255,255,255,0.4)] flex items-center gap-2 z-10 relative border-4 border-black"
+                >
+                  Siguiente Juego <ArrowRight />
+                </motion.button>
+              </motion.div>
+            );
+          }
+
+          return (
+            <div className="h-full w-full bg-slate-900 flex flex-col items-center justify-between p-4 relative overflow-hidden select-none">
+              <motion.div animate={{ backgroundColor: room === 'kitchen' ? '#7f1d1d' : (room === 'bathroom' ? '#1e3a8a' : '#3f6212') }} className="absolute inset-0 z-0 transition-colors duration-500" />
+              <div className="relative z-20 w-full bg-yellow-400 text-black font-black uppercase text-xs p-2 tracking-widest animate-pulse text-center rounded-lg shadow-lg">MISIÓN: Cuida la fucking planta</div>
+
+              <div className="flex-1 w-full flex flex-col items-center justify-center relative z-10">
+                <motion.div key={dialog} initial={{ opacity: 0, y: 10, scale: 0.9 }} animate={{ opacity: 1, y: 0, scale: 1 }} className="bg-white text-black p-4 rounded-2xl rounded-bl-none mb-4 relative font-bold shadow-xl max-w-[80%]">
+                  "{dialog}" <div className="absolute -bottom-2 left-4 w-4 h-4 bg-white rotate-45" />
+                </motion.div>
+
+                <div className="relative">
+                   {animation === 'petting' && (
+                     <motion.div className="absolute -top-10 left-0 right-0 flex justify-center gap-4 text-pink-500 z-30">
+                       {[1,2,3].map(i => <motion.div key={i} initial={{y:0, opacity:1}} animate={{y:-50, opacity:0}} transition={{duration:1, delay: i*0.2}}><Heart fill="currentColor" /></motion.div>)}
+                     </motion.div>
+                   )}
+                   {animation === 'washing' && (
+                     <motion.div className="absolute -top-20 left-0 right-0 flex justify-center gap-2 text-blue-400 z-30">
+                       {[1,2,3,4,5].map(i => <motion.div key={i} initial={{y:-20, opacity:0}} animate={{y:100, opacity: [1, 0]}} transition={{duration:0.8, repeat: Infinity, delay: i*0.1}}><Droplets size={16} fill="currentColor" /></motion.div>)}
+                     </motion.div>
+                   )}
+
+                   <motion.div
+                    animate={plantState === 'dead' ? { rotate: 180, scale: 0.5, opacity: 0.5, y: 100 } : (plantVariants[animation] || plantVariants.idle)}
+                    transition={{ duration: animation === 'idle' ? 2 : 0.5, repeat: animation === 'idle' ? Infinity : (animation === 'petting' ? 2 : 0), ease: "easeInOut" }}
+                    className="relative w-64 h-64 flex items-center justify-center drop-shadow-2xl"
+                  >
+                      <img src={PHOTOS.plant} alt="Planta" className={`w-full h-full object-contain filter ${plantState === 'dead' ? 'grayscale brightness-50' : 'contrast-125'}`} />
+                      {plantState !== 'dead' && (
+                        <>
+                           <motion.div animate={{ scaleY: [1, 0.1, 1] }} transition={{ repeat: Infinity, duration: 4, delay: 1 }} className="absolute top-1/3 left-1/3 w-8 h-8 bg-white rounded-full border-2 border-black flex items-center justify-center"><div className="w-3 h-3 bg-black rounded-full translate-x-1" /></motion.div>
+                           <motion.div animate={{ scaleY: [1, 0.1, 1] }} transition={{ repeat: Infinity, duration: 4, delay: 1.1 }} className="absolute top-1/3 right-1/3 w-8 h-8 bg-white rounded-full border-2 border-black flex items-center justify-center"><div className="w-3 h-3 bg-black rounded-full translate-x-1" /></motion.div>
+                        </>
+                      )}
+                  </motion.div>
+                </div>
+
+                <div className="h-24 w-full flex items-center justify-center mt-4">
+                    <AnimatePresence mode="wait">
+                        {room === 'kitchen' && (
+                          <motion.div key="kitchen-actions" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="flex gap-4">
+                            <button onClick={handleKill} className="bg-red-600 hover:bg-red-500 text-white p-3 rounded-xl font-bold flex flex-col items-center gap-1 border-b-4 border-red-800 active:border-b-0 active:translate-y-1 transition-all shadow-lg"><Utensils size={24} /><span className="text-xs">Bistec Tieso</span></button>
+                            <button onClick={() => handleInteract('poison')} className="bg-purple-600 hover:bg-purple-500 text-white p-3 rounded-xl font-bold flex flex-col items-center gap-1 border-b-4 border-purple-800 active:border-b-0 active:translate-y-1 transition-all shadow-lg"><FlaskConical size={24} /><span className="text-xs">Veneno (?)</span></button>
+                          </motion.div>
+                        )}
+                        {room === 'living' && <motion.button key="act-pet" onClick={() => handleInteract('pet')} initial={{opacity:0}} animate={{opacity:1}} className="bg-yellow-600 text-white p-3 rounded-xl w-32 font-bold flex flex-col items-center border-b-4 border-yellow-800 active:border-b-0 active:translate-y-1"><Hand className="mx-auto mb-1"/><span className="text-xs">Acariciar</span></motion.button>}
+                        {room === 'bathroom' && <motion.button key="act-wash" onClick={() => handleInteract('wash')} initial={{opacity:0}} animate={{opacity:1}} className="bg-blue-600 text-white p-3 rounded-xl w-32 font-bold flex flex-col items-center border-b-4 border-blue-800 active:border-b-0 active:translate-y-1"><Droplets className="mx-auto mb-1"/><span className="text-xs">Bañar</span></motion.button>}
+                    </AnimatePresence>
+                </div>
+              </div>
+
+              <div className="relative z-20 bg-black/40 backdrop-blur-md p-2 rounded-2xl flex gap-2 w-full justify-between max-w-xs border border-white/10">
+                <button onClick={() => setRoom('living')} className={`flex-1 p-2 rounded-xl flex flex-col items-center ${room === 'living' ? 'bg-yellow-500 text-black' : 'text-white'}`}><Sofa size={20}/><span className="text-[8px] font-bold">SALA</span></button>
+                <button onClick={() => setRoom('kitchen')} className={`flex-1 p-2 rounded-xl flex flex-col items-center ${room === 'kitchen' ? 'bg-red-500 text-white' : 'text-white'}`}><Utensils size={20}/><span className="text-[8px] font-bold">COCINA</span></button>
+                <button onClick={() => setRoom('bathroom')} className={`flex-1 p-2 rounded-xl flex flex-col items-center ${room === 'bathroom' ? 'bg-blue-500 text-white' : 'text-white'}`}><Bath size={20}/><span className="text-[8px] font-bold">BAÑO</span></button>
+              </div>
+            </div>
+          );
+        };
+
+        // JUEGO 3: REGINA ACTION HERO
+        const ActionHeroGame = ({ onWin }) => {
+          const [player, setPlayer] = useState({ x: 10, y: 0, vy: 0, facingRight: true });
+          const [bullets, setBullets] = useState([]);
+          const [zombies, setZombies] = useState([]);
+          const [ammoPickups, setAmmoPickups] = useState([]);
+          const [totems, setTotems] = useState([]); 
+          const [hasTotem, setHasTotem] = useState(false); 
+          const [resurrecting, setResurrecting] = useState(false); 
+          const [isDying, setIsDying] = useState(false); 
+          const [health, setHealth] = useState(100);
+          const [round, setRound] = useState(1);
+          const [killsInRound, setKillsInRound] = useState(0);
+          
+          const [clip, setClip] = useState(12); 
+          const [reserve, setReserve] = useState(24); 
+          const [isReloading, setIsReloading] = useState(false);
+
+          const [gameOver, setGameOver] = useState(false);
+          const [input, setInput] = useState({ left: false, right: false, jump: false, shoot: false, reload: false });
+          const [roundTransition, setRoundTransition] = useState(false);
+          
+          const loopRef = useRef();
+          
+          const PLATFORMS = [
+            { x: 20, y: 25, w: 20, h: 2 },
+            { x: 60, y: 45, w: 25, h: 2 },
+            { x: 10, y: 55, w: 15, h: 2 }
+          ];
+
+          const ROUNDS = [
+            { target: 10, spawnRate: 0.02, zombieSpeed: 0.25, hp: 3, ammoRate: 0.003 }, 
+            { target: 20, spawnRate: 0.035, zombieSpeed: 0.35, hp: 4, ammoRate: 0.005 }, 
+            { target: 35, spawnRate: 0.045, zombieSpeed: 0.45, hp: 5, ammoRate: 0.010 } 
+          ];
+
+          const CLIP_SIZE = 12;
+          const RELOAD_TIME = 1500; 
+
+          const clipRef = useRef(clip);
+          const reserveRef = useRef(reserve);
+          
+          useEffect(() => { clipRef.current = clip; }, [clip]);
+          useEffect(() => { reserveRef.current = reserve; }, [reserve]);
+
+          const handleReloadLogic = useCallback(() => {
+              if (isReloading || clipRef.current >= CLIP_SIZE || reserveRef.current <= 0) return;
+              setIsReloading(true);
+              setTimeout(() => {
+                  const currentClip = clipRef.current;
+                  const currentReserve = reserveRef.current;
+                  const needed = CLIP_SIZE - currentClip;
+                  const taking = Math.min(needed, currentReserve);
+                  
+                  setClip(c => c + taking);
+                  setReserve(r => r - taking);
+                  setIsReloading(false);
+              }, RELOAD_TIME);
+          }, [isReloading, CLIP_SIZE]);
+
+          useEffect(() => {
+            const handleKeyDown = (e) => {
+              if (gameOver || isDying) return;
+              switch(e.key.toLowerCase()) {
+                case 'a': setInput(prev => ({...prev, left: true})); break;
+                case 'd': setInput(prev => ({...prev, right: true})); break;
+                case 'w': case 'arrowup': setInput(prev => ({...prev, jump: true})); break;
+                case ' ': setInput(prev => ({...prev, shoot: true})); break;
+                case 'r': handleReloadLogic(); break;
+              }
+            };
+            const handleKeyUp = (e) => {
+              switch(e.key.toLowerCase()) {
+                case 'a': setInput(prev => ({...prev, left: false})); break;
+                case 'd': setInput(prev => ({...prev, right: false})); break;
+                case 'w': case 'arrowup': setInput(prev => ({...prev, jump: false})); break;
+                case ' ': setInput(prev => ({...prev, shoot: false})); break;
+              }
+            };
+            window.addEventListener('keydown', handleKeyDown);
+            window.addEventListener('keyup', handleKeyUp);
+            return () => {
+              window.removeEventListener('keydown', handleKeyDown);
+              window.removeEventListener('keyup', handleKeyUp);
+            };
+          }, [gameOver, isDying, clip, reserve, handleReloadLogic]);
+
+          const handleTouchStart = (action) => setInput(prev => ({ ...prev, [action]: true }));
+          const handleTouchEnd = (action) => setInput(prev => ({ ...prev, [action]: false }));
+
+          useEffect(() => {
+            if (input.jump && !gameOver && !isDying) {
+                const onGround = player.y <= 0.1;
+                const onPlat = PLATFORMS.some(p => Math.abs(player.y - p.y) < 1 && player.x > p.x - 2 && player.x < p.x + p.w + 2);
+                if (onGround || onPlat) {
+                     setPlayer(p => ({ ...p, vy: 4.5 })); 
+                }
+            }
+          }, [input.jump, gameOver, isDying]); 
+
+          useEffect(() => {
+            if (input.shoot && !gameOver && !isDying) {
+                if (clip > 0 && !isReloading) {
+                    setBullets(prev => [...prev, { 
+                        id: Date.now() + Math.random(), 
+                        x: player.x + (player.facingRight ? 5 : -5), 
+                        y: player.y + 5, 
+                        dir: player.facingRight ? 1 : -1 
+                    }]);
+                    setClip(c => c - 1);
+                }
+            }
+          }, [input.shoot, gameOver, isDying]); 
+
+          useEffect(() => {
+            if (gameOver || roundTransition || resurrecting || isDying) return;
+
+            const currentRoundConfig = ROUNDS[round - 1];
+
+            const loop = () => {
+              setPlayer(p => {
+                let newX = p.x;
+                if (input.left) newX -= 0.8;
+                if (input.right) newX += 0.8;
+                newX = Math.max(0, Math.min(95, newX)); 
+
+                let newY = p.y + p.vy;
+                let newVy = p.vy - 0.25; 
+
+                let grounded = false;
+                if (newY <= 0) { 
+                    newY = 0; 
+                    newVy = 0; 
+                    grounded = true; 
+                } else if (p.vy <= 0) { 
+                    PLATFORMS.forEach(plat => {
+                        if (p.y >= plat.y && newY <= plat.y && newX + 5 > plat.x && newX < plat.x + plat.w) {
+                            newY = plat.y;
+                            newVy = 0;
+                            grounded = true;
+                        }
+                    });
+                }
+
+                return { ...p, x: newX, y: newY, vy: newVy, facingRight: input.right ? true : (input.left ? false : p.facingRight) };
+              });
+
+              setBullets(prev => prev.map(b => ({ ...b, x: b.x + (b.dir * 2.5) })).filter(b => b.x > -10 && b.x < 110));
+
+              if (Math.random() < currentRoundConfig.spawnRate) {
+                 setZombies(prev => [...prev, { id: Math.random(), x: Math.random() > 0.5 ? 100 : -10, y: 0, hp: currentRoundConfig.hp }]);
+              }
+
+              if (Math.random() < currentRoundConfig.ammoRate) { 
+                  setAmmoPickups(prev => [...prev, { id: Math.random(), x: randomRange(10, 90), y: 50 }]);
+              }
+
+              if (!hasTotem && Math.random() < 0.005) { 
+                  setTotems(prev => [...prev, { id: Math.random(), x: randomRange(10, 90), y: 50 }]);
+              }
+
+              setAmmoPickups(prev => {
+                  let nextPickups = prev.map(a => ({...a, y: Math.max(0, a.y - 0.5)}));
+                  let collected = [];
+                  let remaining = [];
+                  
+                  nextPickups.forEach(a => {
+                      if (Math.abs(a.x - player.x) < 8 && Math.abs(a.y - player.y) < 8) {
+                          collected.push(a);
+                      } else {
+                          remaining.push(a);
+                      }
+                  });
+
+                  if (collected.length > 0) {
+                      setReserve(r => r + (collected.length * 12)); 
+                  }
+                  
+                  return remaining;
+              });
+
+              setTotems(prev => {
+                  let nextTotems = prev.map(t => ({...t, y: Math.max(0, t.y - 0.5)}));
+                  let collected = false;
+                  let remaining = [];
+
+                  nextTotems.forEach(t => {
+                      if (Math.abs(t.x - player.x) < 8 && Math.abs(t.y - player.y) < 8) {
+                          collected = true;
+                      } else {
+                          remaining.push(t);
+                      }
+                  });
+
+                  if (collected) {
+                      setHasTotem(true);
+                  }
+
+                  return remaining;
+              });
+
+              setZombies(prev => {
+                 let nextZombies = prev.map(z => {
+                     const dir = z.x > player.x ? -currentRoundConfig.zombieSpeed : currentRoundConfig.zombieSpeed;
+                     return { ...z, x: z.x + dir };
+                 });
+
+                 nextZombies = nextZombies.map(z => {
+                     const hit = bullets.some(b => Math.abs(b.x - z.x) < 5 && Math.abs(b.y - z.y) < 10); 
+                     if (hit) return { ...z, hp: z.hp - 1, hit: true };
+                     return { ...z, hit: false };
+                 });
+                 
+                 let livingZombies = [];
+                 let deadCount = 0;
+                 nextZombies.forEach(z => {
+                     if (z.hp > 0) livingZombies.push(z);
+                     else deadCount++;
+                 });
+
+                 if (deadCount > 0) setKillsInRound(k => k + deadCount);
+
+                 livingZombies.forEach(z => {
+                     if (Math.abs(z.x - player.x) < 5 && Math.abs(z.y - player.y) < 8) {
+                         setHealth(h => Math.max(0, h - 1));
+                     }
+                 });
+
+                 return livingZombies;
+              });
+
+              if (health <= 0) {
+                  if (hasTotem) {
+                      setResurrecting(true);
+                      setHasTotem(false);
+                      setTimeout(() => {
+                          setHealth(100);
+                          setResurrecting(false);
+                          setZombies(prev => prev.filter(z => Math.abs(z.x - player.x) > 30));
+                      }, 2500); 
+                  } else {
+                      setIsDying(true);
+                      setTimeout(() => {
+                          setIsDying(false);
+                          setGameOver(true);
+                      }, 1000);
+                  }
+              }
+            };
+
+            loopRef.current = setInterval(loop, 16); 
+            return () => clearInterval(loopRef.current);
+          }, [input, player, bullets, health, gameOver, roundTransition, round, clip, isReloading, hasTotem, resurrecting, isDying]);
+
+          useEffect(() => {
+            if (gameOver) return;
+            const currentTarget = ROUNDS[round - 1].target;
+            
+            if (killsInRound >= currentTarget) {
+              if (round < ROUNDS.length) {
+                setRoundTransition(true);
+                setTimeout(() => {
+                  setRound(r => r + 1);
+                  setKillsInRound(0);
+                  setZombies([]);
+                  setBullets([]);
+                  setRoundTransition(false);
+                }, 3000);
+              } else {
+                setTimeout(onWin, 500);
+                setGameOver(true);
+              }
+            }
+          }, [killsInRound, round, gameOver, onWin]);
+
+          return (
+            <div className="h-full w-full bg-gray-900 relative overflow-hidden select-none font-mono">
+               <div className="absolute inset-0 opacity-50 bg-cover bg-center" style={{ backgroundImage: `url(${PHOTOS.apocalypse_bg})` }} />
+               
+               <motion.div 
+                 className="absolute inset-0 w-full h-full"
+                 animate={resurrecting ? { x: [-10, 10, -10, 10, 0], y: [-5, 5, -5, 5, 0] } : (isDying ? { x: [-20, 20, -15, 15, -10, 10, 0], opacity: [1, 0.5, 0] } : {})}
+                 transition={{ duration: 0.5, repeat: resurrecting ? Infinity : 0 }}
+               >
+                   {isDying && <div className="absolute inset-0 bg-red-600 mix-blend-multiply z-50 animate-pulse"></div>}
+
+                   <div className="absolute top-4 left-4 z-30 flex flex-col gap-2">
+                      <div className="flex gap-4">
+                        <div className="bg-red-900/80 px-4 py-1 rounded-full border border-red-500 text-white font-bold flex items-center gap-2">
+                            <Heart size={16} className="fill-red-500" /> {Math.floor(health)}%
+                        </div>
+                        <div className={`px-4 py-1 rounded-full border text-white font-bold flex items-center gap-2 transition-all ${isReloading ? 'bg-orange-600 border-orange-400 animate-pulse' : (clip === 0 ? 'bg-red-600 border-red-400' : 'bg-yellow-800/80 border-yellow-500')}`}>
+                            <Zap size={16} className="fill-yellow-500" /> 
+                            {isReloading ? "RECARGANDO..." : `${clip} / ${reserve}`}
+                        </div>
+                        {hasTotem && (
+                            <div className="bg-purple-900/80 px-3 py-1 rounded-full border border-purple-500 text-white flex items-center gap-1 animate-pulse">
+                                <span className="text-xl">🗿</span>
+                            </div>
+                        )}
+                      </div>
+                      <div className="bg-stone-800/80 px-4 py-1 rounded-full border border-stone-500 text-white font-bold text-sm">
+                         RONDA {round}/{ROUNDS.length} | KILLS: {killsInRound}/{ROUNDS[round-1].target}
+                      </div>
+                   </div>
+
+                   {PLATFORMS.map((p, i) => (
+                       <div key={i} className="absolute bg-stone-700 border-t-4 border-stone-500 rounded-sm shadow-lg z-10" style={{ left: `${p.x}%`, bottom: `${p.y}%`, width: `${p.w}%`, height: `${p.h}%` }} />
+                   ))}
+
+                   <div className="absolute bottom-0 w-full h-32 bg-gradient-to-t from-black to-transparent z-0" />
+                   <div className="absolute bottom-0 w-full h-8 bg-stone-900 border-t-4 border-stone-600 z-10" />
+
+                   {ammoPickups.map(a => (
+                       <div key={a.id} className="absolute z-15 animate-bounce" style={{ left: `${a.x}%`, bottom: `${8 + a.y}%` }}>
+                           <Package size={24} className="text-yellow-400 drop-shadow-lg" />
+                       </div>
+                   ))}
+                   {totems.map(t => (
+                       <div key={t.id} className="absolute z-15 animate-bounce" style={{ left: `${t.x}%`, bottom: `${8 + t.y}%` }}>
+                           <div className="text-3xl filter drop-shadow-[0_0_10px_purple]">🗿</div>
+                       </div>
+                   ))}
+
+                   <div className="absolute w-12 h-16 z-20 transition-transform" style={{ left: `${player.x}%`, bottom: `${8 + player.y}%`, transform: `scaleX(${player.facingRight ? 1 : -1})` }}>
+                      <img src={PHOTOS.avatar} className="w-full h-full object-cover rounded-lg border-2 border-white" />
+                      <img src={PHOTOS.gun} className="absolute top-6 -right-4 w-8 h-6 object-contain" />
+                      {isReloading && (
+                         <div className="absolute -top-4 left-0 w-full h-1 bg-gray-700 rounded-full">
+                           <motion.div initial={{width:0}} animate={{width:"100%"}} transition={{duration: 1.5}} className="h-full bg-yellow-400" />
+                         </div>
+                      )}
+                   </div>
+
+                   {zombies.map(z => (
+                      <div key={z.id} className="absolute w-12 h-16 z-15 grayscale contrast-125" style={{ left: `${z.x}%`, bottom: `${8 + z.y}%` }}>
+                         <img src={PHOTOS.zombie} className="w-full h-full object-cover" />
+                         <div className="absolute -top-2 w-full h-1 bg-red-900"><div className="h-full bg-green-500" style={{ width: `${(z.hp/ROUNDS[round-1].hp)*100}%` }} /></div>
+                      </div>
+                   ))}
+
+                   {bullets.map(b => (
+                      <div key={b.id} className="absolute w-2 h-2 bg-yellow-400 rounded-full z-15 shadow-[0_0_5px_yellow]" style={{ left: `${b.x}%`, bottom: `${8 + b.y}%` }} />
+                   ))}
+               </motion.div>
+
+               {resurrecting && <ResurrectionOverlay />}
+               {isDying && !gameOver && <DeathOverlay />}
+               
+               {roundTransition && (
+                 <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/80 flex-col">
+                   <h2 className="text-4xl text-yellow-400 font-bold animate-bounce mb-2">¡RONDA COMPLETADA!</h2>
+                   <p className="text-white text-xl">Prepárate para la Ronda {round + 1}...</p>
+                 </div>
+               )}
+
+               <div className="absolute bottom-4 left-4 z-40 flex gap-2">
+                  <button onMouseDown={() => handleTouchStart('left')} onMouseUp={() => handleTouchEnd('left')} onTouchStart={(e) => { e.preventDefault(); handleTouchStart('left'); }} onTouchEnd={(e) => { e.preventDefault(); handleTouchEnd('left'); }} className="w-16 h-16 bg-white/20 backdrop-blur-md rounded-full border-2 border-white/50 flex items-center justify-center active:bg-white/40"><ArrowLeft size={32} className="text-white" /></button>
+                  <button onMouseDown={() => handleTouchStart('right')} onMouseUp={() => handleTouchEnd('right')} onTouchStart={(e) => { e.preventDefault(); handleTouchStart('right'); }} onTouchEnd={(e) => { e.preventDefault(); handleTouchEnd('right'); }} className="w-16 h-16 bg-white/20 backdrop-blur-md rounded-full border-2 border-white/50 flex items-center justify-center active:bg-white/40"><ArrowRight size={32} className="text-white" /></button>
+               </div>
+
+               <div className="absolute bottom-4 right-4 z-40 flex gap-4">
+                  <button onClick={handleReloadLogic} className={`w-16 h-16 backdrop-blur-md rounded-full border-4 flex items-center justify-center active:scale-95 shadow-lg transition-colors ${isReloading ? 'bg-gray-600 border-gray-500' : 'bg-yellow-600/80 border-yellow-400'}`}>
+                     <RotateCw size={32} className={`text-white ${isReloading ? 'animate-spin' : ''}`} />
+                  </button>
+                  <button onMouseDown={() => handleTouchStart('shoot')} onMouseUp={() => handleTouchEnd('shoot')} onTouchStart={(e) => { e.preventDefault(); handleTouchStart('shoot'); }} onTouchEnd={(e) => { e.preventDefault(); handleTouchEnd('shoot'); }} className={`w-16 h-16 backdrop-blur-md rounded-full border-4 flex items-center justify-center active:scale-95 shadow-lg ${clip > 0 ? 'bg-red-500/80 border-red-400' : 'bg-gray-500/80 border-gray-400 cursor-not-allowed'}`}><Crosshair size={32} className="text-white" /></button>
+                  <button onMouseDown={() => handleTouchStart('jump')} onMouseUp={() => handleTouchEnd('jump')} onTouchStart={(e) => { e.preventDefault(); handleTouchStart('jump'); }} onTouchEnd={(e) => { e.preventDefault(); handleTouchEnd('jump'); }} className="w-16 h-16 bg-green-500/80 backdrop-blur-md rounded-full border-4 border-green-400 flex items-center justify-center active:scale-95 shadow-lg"><ArrowUp size={32} className="text-white" /></button>
+               </div>
+               
+               <div className="hidden md:block absolute bottom-4 left-1/2 -translate-x-1/2 text-white/50 text-xs font-mono bg-black/50 px-2 py-1 rounded">
+                  
+               </div>
+
+               {gameOver && health <= 0 && <RetryScreen onRetry={() => { setHealth(100); setZombies([]); setBullets([]); setGameOver(false); setKillsInRound(0); setRound(1); setClip(12); setReserve(24); setHasTotem(false); setTotems([]); setIsDying(false); }} message="¡Te han infectado! 🍄🧟‍♂️" />}
+            </div>
+          );
+        };
+
+        // JUEGO 4: LA RECETA DEL CORAZÓN
+        const LoveHeartGame = ({ onWin }) => {
+          const [fill, setFill] = useState(0);
+          const [floatingItems, setFloatingItems] = useState([]);
+          const [completed, setCompleted] = useState(false);
+          const [shake, setShake] = useState(false);
+
+          // Fotos de cosas que SI le gustan
+          const goodItemsDef = [
+            { img: PHOTOS.mangos, text: "MANGOS", type: 'good' },
+            { img: PHOTOS.sixseven, text: "67", type: 'good' },
+            { img: PHOTOS.quiz4, text: "CHARLIE K.", type: 'good' },
+            { img: PHOTOS.avatar, text: "Tu", type: 'good' }
+          ];
+
+          // Fotos de cosas que NO le gustan
+          const badItemsDef = [
+            { img: PHOTOS.bad1, text: "Caca", type: 'bad' },
+            { img: PHOTOS.bad2, text: "NickAvocado", type: 'bad' },
+            { img: PHOTOS.bad3, text: "FreeFire", type: 'bad' }
+          ];
+
+          useEffect(() => {
+            if (completed) return;
+            const spawnInterval = setInterval(() => {
+              // 35% de probabilidad de que salga una foto de "mentira" (mala)
+              const isBad = Math.random() < 0.35;
+              const arr = isBad ? badItemsDef : goodItemsDef;
+              const def = arr[Math.floor(Math.random() * arr.length)];
+              
+              setFloatingItems(prev => [...prev, {
+                id: Date.now() + Math.random(),
+                ...def,
+                x: randomRange(10, 80),
+                y: -20, 
+                speed: randomRange(2.5, 5.5) // Caen mucho más rápido ahora
+              }]);
+            }, 350); // Spawnean más seguido
+
+            const moveInterval = setInterval(() => {
+              setFloatingItems(prev => prev.map(item => ({
+                ...item,
+                y: item.y + item.speed
+              })).filter(item => item.y < 120)); 
+            }, 20);
+
+            return () => {
+              clearInterval(spawnInterval);
+              clearInterval(moveInterval);
+            };
+          }, [completed]);
+
+          // Modificado para recibir el type y castigar si es 'bad'
+          const handleTap = (id, type) => {
+            if (completed) return;
+            setFloatingItems(prev => prev.filter(item => item.id !== id));
+            
+            setFill(prev => {
+              if (type === 'bad') {
+                  // Efecto visual de castigo
+                  setShake(true);
+                  setTimeout(() => setShake(false), 400);
+                  return Math.max(0, prev - 15); // Le quita 15%
+              } else {
+                  const next = prev + 5; // Aumenta de 5 en 5 (necesita 20 fotos buenas)
+                  if (next >= 100) {
+                    setCompleted(true);
+                    setTimeout(onWin, 4000);
+                  }
+                  return next;
+              }
+            });
+          };
+
+          return (
+             <div className="h-full w-full bg-gradient-to-br from-fuchsia-950 to-pink-950 relative overflow-hidden flex flex-col items-center justify-center select-none">
+               
+               {/* Efecto de daño si presiona una mala */}
+               {shake && <div className="absolute inset-0 bg-red-600/30 z-40 pointer-events-none animate-pulse" />}
+
+               <div className="absolute top-12 text-center z-20 px-4 pointer-events-none">
+                 <h2 className="text-3xl font-black text-pink-200 drop-shadow-md mb-2">Llena nuestro corazón</h2>
+                 <p className="text-sm text-pink-300 font-medium">Atrapa lo que es tuff❤️‍🩹</p>
+               </div>
+
+               <motion.div 
+                  className="relative w-64 h-64 flex items-center justify-center mt-12 pointer-events-none"
+                  animate={shake ? { x: [-10, 10, -10, 10, 0] } : {}}
+                  transition={{ duration: 0.4 }}
+               >
+                  <i className="fa-solid fa-heart text-[14rem] text-white/10 absolute top-0 left-0 right-0 bottom-0 text-center leading-[16rem]"></i>
+                  
+                  <motion.i 
+                    className="fa-solid fa-heart text-pink-500 absolute top-0 left-0 right-0 bottom-0 text-center leading-[16rem]"
+                    animate={{ 
+                      scale: 0.5 + (Math.min(fill, 100) / 200),
+                      opacity: 0.2 + (Math.min(fill, 100) / 125)
+                    }}
+                    transition={{ type: "spring", bounce: 0.4 }}
+                    style={{ fontSize: '14rem', filter: `drop-shadow(0 0 ${fill / 2}px rgba(236,72,153,1))` }}
+                  />
+                  
+                  <span className="absolute z-20 font-black text-white text-3xl mix-blend-overlay drop-shadow-lg">
+                    {Math.min(fill, 100)}%
+                  </span>
+               </motion.div>
+
+               <AnimatePresence>
+                 {!completed && floatingItems.map(item => (
+                   <motion.div
+                     key={item.id}
+                     initial={{ opacity: 0, scale: 0.5 }}
+                     animate={{ opacity: 1, scale: 1 }}
+                     exit={{ opacity: 0, scale: 0 }} 
+                     transition={{ duration: 0.2 }}
+                     onMouseDown={() => handleTap(item.id, item.type)}
+                     onTouchStart={(e) => { e.preventDefault(); handleTap(item.id, item.type); }}
+                     className={`absolute flex flex-col items-center justify-center p-2 cursor-pointer bg-white/20 backdrop-blur-md rounded-2xl border-2 z-30 ${
+                       item.type === 'bad' 
+                         ? 'border-red-500 shadow-[0_0_15px_rgba(239,68,68,0.5)]' 
+                         : 'border-pink-400/50 shadow-[0_0_15px_rgba(236,72,153,0.5)]'
+                     }`}
+                     style={{ left: `${item.x}%`, top: `${item.y}%` }}
+                     whileTap={{ scale: 0.8 }}
+                   >
+                      <img src={item.img} className={`w-16 h-16 md:w-20 md:h-20 object-cover rounded-xl mb-1 shadow-inner pointer-events-none ${item.type === 'bad' ? 'grayscale' : ''}`} alt="recuerdo" />
+                      <span className={`text-[10px] md:text-xs font-black uppercase tracking-wider pointer-events-none ${item.type === 'bad' ? 'text-red-200' : 'text-pink-100'}`}>
+                        {item.text}
+                      </span>
+                   </motion.div>
+                 ))}
+               </AnimatePresence>
+
+               <AnimatePresence>
+                 {completed && (
+                   <motion.div 
+                      initial={{ opacity: 0, scale: 0 }} 
+                      animate={{ opacity: 1, scale: [0, 1.2, 1] }} 
+                      transition={{ type: "spring", duration: 1 }}
+                      className="absolute inset-0 flex items-center justify-center z-40 bg-pink-900/80 backdrop-blur-sm"
+                   >
+                      <div className="text-center p-6 pointer-events-none">
+                         <i className="fa-solid fa-heart text-9xl text-pink-400 drop-shadow-[0_0_50px_rgba(236,72,153,1)] animate-bounce mb-8"></i>
+                         <h1 className="text-4xl md:text-6xl font-black text-white mb-4 leading-tight">¡CORAZÓN<br/>LLENO!</h1>
+                         <p className="text-xl text-pink-200 font-medium">La mezcla perfecta ❤️‍🩹❤️‍🩹</p>
+                      </div>
+                   </motion.div>
+                 )}
+               </AnimatePresence>
+             </div>
+          )
+        };
+
+        // PANTALLA FINAL
+        const FinalScreen = ({ onRestart }) => (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="h-full w-full bg-purple-900 flex flex-col items-center justify-center p-4 overflow-hidden relative select-none">
+            <div className="absolute inset-0 opacity-30" style={{ backgroundImage: 'radial-gradient(#ffffff 1px, transparent 1px)', backgroundSize: '20px 20px' }} />
+            <motion.div animate={{ rotate: [0, 2, -2, 0] }} transition={{ repeat: Infinity, duration: 4 }} className="z-10 bg-white border-4 border-black p-2 shadow-[10px_10px_0px_rgba(0,0,0,1)] max-w-sm w-full rotate-1">
+              <div className="bg-pink-200 p-8 flex flex-col items-center text-center space-y-6 border border-black/10">
+                <div className="w-40 h-40 bg-black overflow-hidden border-4 border-pink-500 rounded-full shadow-[0_0_20px_rgba(236,72,153,0.5)]">
+                    <img src={PHOTOS.avatar} className="w-full h-full object-cover" />
+                </div>
+                <p className="font-bold text-pink-950 leading-relaxed text-xl italic px-2">
+                  "Emmmm, eso fue todo... por ahora. Quizas en un futuro agregue nuevas cosas 👀👀👀"
+                </p>
+              </div>
+            </motion.div>
+            <motion.button whileHover={{ scale: 1.1 }} onClick={onRestart} className="mt-12 z-10 flex items-center gap-2 bg-blue-600 text-white font-bold py-3 px-6 border-4 border-white shadow-[6px_6px_0px_rgba(0,0,0,0.5)] active:shadow-none active:translate-y-1 transition-all">
+              <RefreshCcw size={18} /> VOLVER A JUGAR
+            </motion.button>
+          </motion.div>
+        );
+
+        // --- APP CONTROLLER ---
+        function App() {
+          const [stage, setStage] = useState('intro');
+
+          const introSlides = [
+            { text: "Hola Regina, esto es por y para tiii :D" },
+            { text: "Dame un 5000 pbesos...", sub: "jijijiji " }
+          ];
+
+          const quizIntroSlides = [
+            { text: "Antes que todo..." },
+            { text: "Vamos a probar ese cerebro tuyo 🧠", img: PHOTOS.random },
+            { text: "A ver qué tan despierta estás 👀👀👀" }
+          ];
+
+          const runnerIntroSlides = [
+            { text: "Nada mal ehhh" },
+            { text: "Ahora sí..." },
+            { text: "A ver qué tal tus reflejos" },
+            { text: "Desliza para no morir" },
+            { text: "15 segundos porque es lo que duro yo 🥀🥀🥀" }
+          ];
+
+          const plantIntroSlides = [
+            { text: "Sabía que necesitarías ayuda...", sub: "Eres muuuuuy manca 👎🏻" },
+            { text: "Probemos otra cosa" },
+            { text: "Cuida esta planta porfavor, es de mi primo" }
+          ];
+
+          const tlousIntroSlides = [
+            { text: "Me dijiste que te gustaba Telás Sofás", img: PHOTOS.tlous_meme },
+            { text: "Así que..." },
+            { text: "¡Acaba con estos chasqueadores o wheterever they be! 🍄🔫" },
+            { text: "Sobrevive 3 rondas" }
+          ];
+
+          const loveIntroSlides = [
+            { text: "Después de sobrevivir al apocalipsis... " },
+            { text: "Toca armar algo pipirisnais 💖", sub: "Es hora de ponernos románticos jejejejejej" },
+            { text: "A ver qué tan buena eres para esto, si fallas... eh... no sé... ijijijiijiji" }
+          ];
+          
+          return (
+            <div className="fixed inset-0 bg-black text-white font-sans overflow-hidden select-none">
+              <CRTEffect />
+              <AnimatePresence mode="wait">
+                
+                {stage === 'intro' && <SlideSequence key="intro" slides={introSlides} onComplete={() => setStage('quiz_intro')} />}
+                
+                {/* --- NUEVO JUEGO: DUOLINGO QUIZ --- */}
+                {stage === 'quiz_intro' && <SlideSequence key="quiz_intro" slides={quizIntroSlides} onComplete={() => setStage('game_quiz')} />}
+                {stage === 'game_quiz' && <DuolingoQuiz key="game_quiz" onWin={() => setStage('runner_intro')} />}
+
+                {stage === 'runner_intro' && <SlideSequence key="runner_intro" slides={runnerIntroSlides} onComplete={() => setStage('game1')} />}
+                {stage === 'game1' && (
+                  <div key="game1" className="h-full w-full">
+                     <motion.div initial={{opacity: 1}} animate={{opacity: 0}} transition={{delay: 2, duration: 0.5}} className="absolute inset-0 z-40 bg-black/80 flex items-center justify-center pointer-events-none"><h1 className="text-4xl text-green-400 font-mono font-bold">DESLIZA</h1></motion.div>
+                     <CyberRunner onWin={() => setStage('plant_intro')} />
+                  </div>
+                )}
+                
+                {stage === 'plant_intro' && <SlideSequence key="plant_intro" slides={plantIntroSlides} onComplete={() => setStage('game_plant')} />}
+                {stage === 'game_plant' && (
+                  <PlantGame key="game_plant" onWin={() => setStage('tlous_intro')} onKill={() => setStage('tlous_intro')} />
+                )}
+                
+                {stage === 'tlous_intro' && <SlideSequence key="tlous_intro" slides={tlousIntroSlides} onComplete={() => setStage('game_tlous')} />}
+                {stage === 'game_tlous' && <ActionHeroGame key="game_tlous" onWin={() => setStage('love_intro')} />}
+
+                {stage === 'love_intro' && <SlideSequence key="love_intro" slides={loveIntroSlides} onComplete={() => setStage('game_love')} />}
+                {stage === 'game_love' && <LoveHeartGame key="game_love" onWin={() => setStage('final_screen')} />}
+
+                {stage === 'final_screen' && <FinalScreen key="final" onRestart={() => setStage('intro')} />}
+              </AnimatePresence>
+              <div className="fixed bottom-2 right-2 text-[10px] text-green-900 font-mono z-50 opacity-50 pointer-events-none">v67.67</div>
+            </div>
+          );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
