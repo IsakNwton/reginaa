@@ -424,7 +424,7 @@
           );
         };
 
-        // JUEGO 1: CYBER RUNNER (HARDCORE)
+        // JUEGO 1: CYBER RUNNER
         const CyberRunner = ({ onWin }) => {
           const [playerX, setPlayerX] = useState(50);
           const [playerY, setPlayerY] = useState(80);
@@ -469,8 +469,6 @@
           const update = useCallback(() => {
             if (failed || gameWon) return;
             const timeElapsed = 15 - timeLeft;
-            
-            // VELOCIDAD HARDCORE RESTAURADA
             const baseSpeed = 0.8 + (timeElapsed * 0.04); 
 
             setObstacles(prev => {
@@ -517,7 +515,6 @@
               return newObstacles;
             });
 
-            // MÁS OBSTÁCULOS HARDCORE
             const spawnChance = 0.02 + (timeElapsed * 0.003);
             if (Math.random() < spawnChance) {
               setObstacles(prev => [...prev, { id: Date.now(), x: randomRange(10, 90), y: -10, type: 'ghost' }]);
